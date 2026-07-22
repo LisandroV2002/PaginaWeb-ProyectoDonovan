@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Inteligente de Vigilancia Agrometeorológica</title>
+    
+    <link rel="stylesheet" href="estilos.css">
+    
+    <link rel="stylesheet" type="text/css" href="phosphor/phosphor.css" />
+    
+    <link rel="stylesheet" href="phosphor/regular/style.css">
+    <link rel="stylesheet" href="phosphor/fill/style.css">
+    <link rel="stylesheet" href="phosphor/bold/style.css">
+    
+    <script src="chart.min.js"></script>
+
+
+</head>
+<body class="p-4 md:p-8 max-w-7xl mx-auto">
+
+    <!-- HEADER -->
+    <header class="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-2xl shadow-sm mb-6 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSJub25lIiBzdHJva2U9IiM0YWY1NTAiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')] mix-blend-multiply"></div>
+        
+        <div class="flex justify-between w-full md:w-auto items-center mb-4 md:mb-0 z-10">
+            <div class="border border-gray-300 rounded-xl px-4 py-2 font-bold text-gray-700 flex items-center gap-2 bg-white">
+                <i class="ph ph-buildings text-2xl"></i> UNSL
+            </div>
+            <div class="border border-gray-300 rounded-xl px-4 py-2 font-bold text-gray-700 flex items-center gap-2 bg-white md:hidden">
+                <i class="ph ph-leaf text-2xl text-green-600"></i> LOGO
+            </div>
+        </div>
+
+        <h1 class="text-xl md:text-2xl font-bold text-[#143d2f] text-center max-w-2xl z-10">
+            sistema inteligente de vigilancia agrometeorológica para invernadero
+        </h1>
+
+        <div class="hidden md:flex border border-gray-300 rounded-xl px-4 py-2 font-bold text-gray-700 items-center gap-2 bg-white z-10">
+            <i class="ph ph-leaf text-2xl text-green-600"></i> LOGO PROYECTO
+        </div>
+    </header>
+
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- COLUMNA IZQUIERDA (Estado y Gráficos) -->
+        <div class="lg:col-span-7 space-y-6">
+            
+            <!-- SECCIÓN ESTADO GENERAL -->
+            <div>
+                <h2 class="text-sm font-bold text-gray-500 uppercase flex items-center gap-2 mb-4">
+                    <i class="ph-fill ph-chart-bar text-green-600 text-lg"></i> ESTADO GENERAL
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- 1. Tarjeta Estación -->
+                    <div class="bg-[#0b3b24] text-white rounded-2xl p-5 relative overflow-hidden shadow-sm flex flex-col justify-between">
+                        <i class="ph ph-wind text-5xl absolute -top-2 -right-2 opacity-20"></i>
+                        <div class="flex items-start gap-3 mb-4">
+                            <i class="ph ph-broadcast text-3xl"></i>
+                            <div>
+                                <h3 class="text-sm text-gray-300">Estación</h3>
+                                <p class="font-bold text-base leading-tight">Donovan REM</p>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="inline-flex items-center gap-2 bg-[#7cb518] text-white text-xs font-bold px-3 py-1.5 rounded-full mb-3 shadow-sm w-max" id="badge-estado">
+                                <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div> ACTIVA
+                            </div>
+                            <p class="text-xs text-gray-300">Última actualización</p>
+                            <p class="text-sm font-semibold" id="txt-actualizacion">--:--</p>
+                        </div>
+                    </div>
+
+                    <!-- 2. Tarjeta Alertas -->
+                    <div class="bg-white rounded-2xl p-5 flex flex-col justify-center items-center text-center shadow-sm">
+                        <h3 class="text-sm font-bold text-gray-600 mb-3">Alertas</h3>
+                        <div id="alerta-icono" class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-3 text-green-600 shadow-inner">
+                            <i class="ph-bold ph-check text-3xl"></i>
+                        </div>
+                        <p id="alerta-titulo" class="font-bold text-gray-800">Sin alertas activas</p>
+                        <p id="alerta-desc" class="text-xs text-gray-500 mt-1">Todo bajo control</p>
+                    </div>
+
+                    <!-- 3. Tarjeta Temperatura actual y predicción -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm flex flex-col justify-between text-center items-center">
+                        <h3 class="text-sm font-bold text-gray-600 mb-1">Temperatura</h3>
+                        
+                        <div class="flex items-center justify-center gap-3 my-2">
+                            <i class="ph-fill ph-cloud-sun text-5xl text-yellow-500"></i>
+                            <div class="text-left">
+                                <p class="text-4xl font-bold text-gray-800" id="temp-actual">--<span class="text-xl">°C</span></p>
+                                <p class="text-xs text-gray-500 text-center">Actual</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-green-50 rounded-xl p-2 w-full border border-green-100 mt-1">
+                            <p class="text-[10px] font-semibold text-green-800 mb-1">Predicción 6 horas</p>
+                            <p class="text-lg font-bold text-gray-800" id="temp-rango">--°C - --°C</p>
+                            <p class="text-[10px] text-gray-500">Rango esperado</p>
+                        </div>
+                    </div>
+
+                    <!-- 4. Tarjeta Condiciones Actuales -->
+                    <div class="bg-white rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                        
+                        
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center gap-3 bg-gray-50 rounded-xl p-2 border border-gray-100">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 shrink-0">
+                                    <i class="ph-fill ph-drop text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] text-gray-500 leading-none mb-1">Humedad</p>
+                                    <p class="font-bold text-sm text-gray-800" id="cond-humedad">-- %</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-3 bg-gray-50 rounded-xl p-2 border border-gray-100">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 shrink-0">
+                                    <i class="ph-bold ph-wind text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] text-gray-500 leading-none mb-1">Viento</p>
+                                    <p class="font-bold text-sm text-gray-800" id="cond-viento">-- km/h</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3 bg-gray-50 rounded-xl p-2 border border-gray-100">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 shrink-0">
+                                    <i class="ph-bold ph-compass text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] text-gray-500 leading-none mb-1">Dirección</p>
+                                    <p class="font-bold text-sm text-gray-800" id="cond-dir">--</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3 bg-gray-50 rounded-xl p-2 border border-gray-100">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 shrink-0">
+                                    <i class="ph-fill ph-cloud-rain text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] text-gray-500 leading-none mb-1">Lluvia</p>
+                                    <p class="font-bold text-sm text-gray-800" id="cond-precip">-- mm</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN GRÁFICA Y PREDICCIÓN -->
+            <div>
+                <h2 class="text-sm font-bold text-gray-500 uppercase flex items-center gap-2 mb-4">
+                    <i class="ph-fill ph-trend-up text-green-600 text-lg"></i> TEMPERATURA OBSERVADA Y PREDICCIÓN
+                </h2>
+                
+                <div class="bg-white rounded-2xl p-5 shadow-sm">
+                    <div class="w-full h-48 mb-6">
+                        <canvas id="tempChart"></canvas>
+                    </div>
+                    <div class="flex overflow-x-auto hide-scroll gap-3 pb-2" id="forecast-cards">
+                        <!-- Generado por JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- COLUMNA DERECHA (Invernadero) -->
+        <div class="lg:col-span-5 space-y-6">
+            <h2 class="text-sm font-bold text-gray-500 uppercase flex items-center gap-2 mb-4">
+                <i class="ph-fill ph-plant text-green-600 text-lg"></i> DATOS DEL INVERNADERO
+            </h2>
+
+            <!-- Bloque Humedad -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                        <i class="ph-fill ph-drop text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-semibold">Humedad promedio del invernadero</p>
+                        <p class="text-3xl font-bold text-green-600" id="inv-hum-prom">--<span class="text-xl text-gray-800">%</span></p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2" id="grid-humedad">
+                    <!-- Generado por JS -->
+                </div>
+            </div>
+
+            <!-- Bloque Temperatura -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-500">
+                        <i class="ph-fill ph-thermometer text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-semibold">Temperatura promedio del invernadero</p>
+                        <p class="text-3xl font-bold text-gray-800" id="inv-temp-prom">--<span class="text-xl">°C</span></p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2" id="grid-temperatura">
+                    <!-- Generado por JS -->
+                </div>
+            </div>
+
+            <p class="text-xs text-gray-400 mt-4 text-center flex items-center justify-center gap-1">
+                <i class="ph ph-info"></i> Sistema de monitoreo en tiempo real para la toma de decisiones.
+            </p>
+        </div>
+
+    </main>
+
+    <!-- ARCHIVO JAVASCRIPT LOCAL -->
+    <script src="app.js"></script>
+
+</body>
+</html>
