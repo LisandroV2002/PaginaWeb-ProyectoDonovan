@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
@@ -205,3 +206,5 @@ def get_invernadero_sectores():
         "humedad_promedio": round(humedad_promedio, 1),
         "sectores": sectores
     }
+    
+app.mount("/", StaticFiles(directory="static", html=True), name="static")

@@ -1,0 +1,17 @@
+{
+  "name": "Vigilancia Agrometeorológica UNSL",
+  "short_name": "Agro UNSL",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f9f8",
+  "theme_color": "#143d2f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

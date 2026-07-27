@@ -1,4 +1,14 @@
 // Configuración de la API
+
+// Registrar el Service Worker para la PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('Service Worker registrado con éxito.', reg.scope))
+      .catch(err => console.error('Error al registrar el Service Worker:', err));
+  });
+}
+
 const API_BASE_URL = "http://localhost:8000"; 
 
 let chartInstance = null;
