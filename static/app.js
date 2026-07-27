@@ -9,7 +9,10 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-const API_BASE_URL = "http://localhost:8000"; 
+// Configuración de la API dinámica (Detecta la IP o dominio automáticamente)
+const API_BASE_URL = window.location.origin;
+
+//const API_BASE_URL = "http://localhost:8000"; 
 
 let chartInstance = null;
 
