@@ -207,4 +207,8 @@ def get_invernadero_sectores():
         "sectores": sectores
     }
     
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PUBLIC_DIR = os.path.join(BASE_DIR, "../public")
+
+app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="public")

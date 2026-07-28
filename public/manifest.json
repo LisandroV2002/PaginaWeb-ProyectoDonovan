@@ -1,14 +1,14 @@
 {
-  "name": "Vigilancia Agrometeorológica UNSL",
-  "short_name": "Agro UNSL",
+  "name": "Sistema Inteligente de Vigilancia Agrometeorológica para Invernaderos",
+  "short_name": "SIVAI",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f7f9f8",
-  "theme_color": "#143d2f",
+  "background_color": "#ffffff",
+  "theme_color": "#0A3632",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "logo.svg",
+      "src": "icons/SIVAI_favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"

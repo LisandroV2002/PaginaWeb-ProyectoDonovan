@@ -1,12 +1,15 @@
-const CACHE_NAME = 'agro-v1';
+const CACHE_NAME = 'sivai-v1';
 const urlsToCache = [
   './',
   './index.html',
-  './estilos.css',
+  './styles.css',
   './app.js',
   './chart.min.js',
   './manifest.json',
-  './logo.svg'
+  './icons/SIVAI_favicon.svg',
+  './icons/SIVAI_marca_Color_SF.svg',
+  './icons/logo-unsl-negativo2.png',
+  './icons/inta_logo.png'
 ];
 
 // Instalar el Service Worker y guardar los archivos estáticos
@@ -24,7 +27,7 @@ self.addEventListener('fetch', event => {
     return; 
   }
 
-  // Para el HTML, CSS y JS, responder con caché si está disponible
+  // Para el HTML, CSS, JS e imágenes, responder con caché si está disponible
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -36,7 +39,7 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Limpiar cachés viejos si actualizas la versión de 'agro-v1' a 'agro-v2'
+// Limpiar cachés viejos si actualizas la versión de 'sivai-v1' a otra
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
