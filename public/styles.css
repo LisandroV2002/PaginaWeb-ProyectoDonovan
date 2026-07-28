@@ -1,5 +1,5 @@
 /* ==========================================================================
- *  SIVAI PWA - SISTEMA DE DISEÑO RESPONSIVE Y MULTI-BLOQUE
+ *  SIVAI - SISTEMA DE DISEÑO RESPONSIVE Y MULTI-BLOQUE
  *  ========================================================================== */
 
 :root {
@@ -72,32 +72,33 @@ body {
   border: none;
 }
 
-/* 1. Header Institucional */
+
+/* ==========================================================================
+ * ESTILOS DE HEADER RESPONSIVE EN 3 COLUMNAS
+ * ========================================================================== */
+
+/* Header general en 3 columnas para pantallas grandes */
 .app-header {
+  display: grid;
   background-color: var(--color-primary);
   color: var(--color-white);
-  padding: 16px 24px;
-  display: flex;
-  justify-content: space-between;
+  grid-template-columns: auto 1fr auto; /* 3 Columnas precisas */
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  padding: 16px 24px;
   width: 100%;
 }
 
 .brand-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: contents; /* Hace que los hijos ocupen col 1 y col 2 */
 }
 
-/* Contenedor del Logo de Marca */
 .brand-logo-wrapper {
+  grid-column: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 
-/* Imagen del Logo Principal */
 .brand-logo-img {
   height: 50px;
   width: auto;
@@ -106,16 +107,8 @@ body {
 }
 
 .brand-titles {
-  display: flex;
-  flex-direction: column;
-}
-
-.brand-name {
-  font-family: var(--font-title);
-  font-size: 1.8rem;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.5px;
+  grid-column: 2;
+  min-width: 0; /* Permite un colapso limpio sin desbordar */
 }
 
 .brand-desc {
@@ -125,21 +118,56 @@ body {
   margin-top: 2px;
 }
 
-/* Logos Institucionales */
 .institution-logo {
+  grid-column: 3;
+  display: flex;
+  flex-direction: row; /* Horizontal en pantallas grandes */
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
   background-color: var(--color-primary);
   padding: 4px 8px;
   border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
 }
 
 .institution-logo .inst-img {
   height: 28px;
   width: auto;
   object-fit: contain;
+}
+
+/* --------------------------------------------------------------------------
+ * ADAPTACIÓN PARA PANTALLAS PEQUEÑAS / MÓVILES 
+ * -------------------------------------------------------------------------- */
+@media (max-width: 600px) {
+  .app-header {
+    grid-template-columns: auto 1fr auto; /* Conserva las 3 columnas */
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  /* 1. Logo SIVAI (Columna 1) */
+  .brand-logo-img {
+    height: 32px; /* Tamaño compacto para liberar espacio horizontal */
+  }
+
+  /* 2. Título Explicativo (Columna 2) */
+  .brand-desc {
+    font-size: 0.68rem; /* Reducción de fuente para encajar en 360px */
+    line-height: 1.1;
+  }
+
+  /* 3. Logos Institucionales Apilados (Columna 3) */
+  .institution-logo {
+    flex-direction: column; /* Apilados verticalmente (uno arriba del otro) */
+    gap: 3px;
+    padding: 2px 3px;
+  }
+
+  .institution-logo .inst-img {
+    height: 17px; /* Altura ajustada para que entren verticalmente sin deformar */
+    width: auto;
+  }
 }
 
 /* Layout Responsive Principal (Móvil por defecto: Bloque 1 -> Bloque 2 -> Bloque 3) */
@@ -617,9 +645,6 @@ body {
 /* ==========================================================================
  *  BREAKPOINTS RESPONSIVE (PANTALLAS GRANDES / PC)
  *  ========================================================================== */
-/* ==========================================================================
- *  BREAKPOINTS RESPONSIVE (PANTALLAS GRANDES / PC)
- *  ========================================================================== */
 @media (min-width: 900px) {
   .app-content {
     display: grid;
@@ -658,9 +683,9 @@ body {
     gap: 8px;
   }
 }
+
 /* ==========================================================================
  *  NUEVOS ESTILOS PARA LA LÓGICA DINÁMICA
- *  Anexar al final del styles.css original
  *  ========================================================================== */
 
 /* Ajustes para Chart.js */
