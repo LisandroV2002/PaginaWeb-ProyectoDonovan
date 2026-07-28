@@ -1,0 +1,717 @@
+/* ==========================================================================
+ *  SIVAI PWA - SISTEMA DE DISEÑO RESPONSIVE Y MULTI-BLOQUE
+ *  ========================================================================== */
+
+:root {
+  /* Paleta Principal y Secundaria */
+  --color-primary: #0A3632;
+  /* Verde SIVAI Profundo Header/Cards */
+  --color-accent: #A0E35D;
+  /* Verde Brote / Badges */
+  --color-surface-soft: #E8F8CE;
+  /* Verde Menta Claro Alerta Segura */
+  --color-text-dark: #0A3632;
+  /* Verde/Gris Oscuro para Títulos */
+  --color-text-body: #303030;
+  /* Cuerpo de texto */
+  --color-bg-app: #F5F7F5;
+  /* Fondo Gris Orgánico */
+  --color-white: #FFFFFF;
+  --color-bg-subcard: #F8FAF8;
+  /* Fondo interno contenedor de predicción */
+  --color-inactive: #888888;
+  /* Sensores inactivos */
+
+  /* Escala de Alertas Semafóricas */
+  --color-alert-red: #D93838;
+  /* Alerta Crítica / Helada */
+  --color-alert-orange: #E67E22;
+  /* Advertencia Media */
+  --color-alert-yellow: #F1C40F;
+  /* Prevención Baja */
+
+  /* Tipografías */
+  --font-title: 'Anek Latin', -apple-system, sans-serif;
+  --font-body: 'Reddit Sans', -apple-system, sans-serif;
+
+  /* Radios de curvatura suaves */
+  --radius-card: 16px;
+  --radius-badge: 12px;
+  --radius-inner: 12px;
+
+  /* Sombras Suaves */
+  --shadow-card: 0px 4px 16px rgba(10, 54, 50, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg-app);
+  color: var(--color-text-body);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Contenedor Principal Ocupa Toda la Pantalla */
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-bg-app);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+
+/* 1. Header Institucional */
+.app-header {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Contenedor del Logo de Marca */
+.brand-logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Imagen del Logo Principal */
+.brand-logo-img {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.brand-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-family: var(--font-title);
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.brand-desc {
+  font-size: 1rem;
+  line-height: 1.15;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 2px;
+}
+
+/* Logos Institucionales */
+.institution-logo {
+  background-color: var(--color-primary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.institution-logo .inst-img {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Layout Responsive Principal (Móvil por defecto: Bloque 1 -> Bloque 2 -> Bloque 3) */
+.app-content {
+  padding: 20px;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Títulos de Sección */
+.section-header-title {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.section-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ==========================================================================
+ *  BLOQUE 1: ESTADO GENERAL Y MÉTRICAS PRINCIPALES
+ *  ========================================================================== */
+.block-1-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  width: 100%;
+}
+
+.station-card {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-radius: var(--radius-card);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.station-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.station-badge-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.station-signal-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--color-accent);
+}
+
+.badge-active {
+  background-color: var(--color-accent);
+  color: var(--color-primary);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-badge);
+}
+
+.station-label {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.station-name {
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.station-time {
+  text-align: right;
+  font-size: 0.85rem;
+}
+
+.update-label {
+  opacity: 0.8;
+  font-size: 0.7rem;
+  display: block;
+}
+
+.status-banner {
+  background-color: var(--color-surface-soft);
+  border: 2px solid #C5EE90;
+  border-radius: var(--radius-card);
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.status-shield-icon {
+  width: 50px;
+  height: 50px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.status-badge-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-main-title {
+  font-family: var(--font-title);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.1;
+}
+
+.status-description {
+  font-size: 0.88rem;
+  color: var(--color-primary);
+  opacity: 0.9;
+}
+
+.metric-hero-card {
+  background-color: var(--color-white);
+  border-radius: var(--radius-card);
+  padding: 18px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-heading {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+}
+
+.temp-display {
+  font-family: var(--font-title);
+  font-size: 3rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  line-height: 1;
+}
+
+.temp-unit {
+  font-size: 1.8rem;
+}
+
+.prediction-box {
+  background-color: var(--color-bg-subcard);
+  border: 1px solid #EAEFEA;
+  border-radius: var(--radius-inner);
+  padding: 12px 14px;
+  text-align: center;
+}
+
+.prediction-label {
+  font-size: 0.72rem;
+  color: #666;
+  display: block;
+}
+
+.prediction-value {
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+}
+
+.metrics-secondary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.secondary-card {
+  background-color: var(--color-white);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.metric-title-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-dark);
+}
+
+.metric-subheading {
+  font-size: 0.85rem;
+}
+
+.secondary-value-display {
+  font-family: var(--font-title);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  line-height: 1;
+  margin-top: 8px;
+}
+
+.wind-direction {
+  font-family: var(--font-title);
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-left: 8px;
+  /* Ocupa espacio hacia la derecha de la unidad */
+  color: var(--color-primary);
+  /* Mantiene la consistencia de color con el número */
+}
+
+.secondary-unit {
+  font-size: 1.4rem;
+}
+
+.secondary-unit-sm {
+  font-size: 1.2rem;
+}
+
+/* ==========================================================================
+ *  BLOQUE 2: GRÁFICO POLÍGONO DE FRECUENCIA Y PROYECCIÓN
+ *  ========================================================================== */
+.block-2-container {
+  background-color: var(--color-white);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.farmer-explanation-box {
+  background-color: #EBF7FF;
+  border-left: 4px solid #2980B9;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  color: #1B4F72;
+}
+
+.farmer-explanation-box strong {
+  font-family: var(--font-title);
+  font-size: 0.98rem;
+}
+
+.chart-wrapper {
+  width: 100%;
+  height: 200px;
+  position: relative;
+}
+
+.svg-chart {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot-observed {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #72C02C;
+}
+
+.dot-predicted {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #2980B9;
+}
+
+.hourly-forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.hourly-card {
+  background-color: var(--color-bg-subcard);
+  border: 1px solid #EAEFEA;
+  border-radius: var(--radius-inner);
+  padding: 10px 6px;
+  text-align: center;
+  min-width: 55px;
+}
+
+.hourly-time {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #666;
+}
+
+.hourly-hour {
+  font-size: 0.65rem;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.hourly-temp {
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* ==========================================================================
+ *  BLOQUE 3: DATOS DE SENSORES DEL INVERNADERO (HUMEDAD Y TEMPERATURA)
+ *  ========================================================================== */
+.block-3-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.block-full-width {
+  grid-column: 1 / -1;
+}
+
+.sensor-group-card {
+  background-color: var(--color-white);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.sensor-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #EAEFEA;
+}
+
+.sensor-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sensor-main-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--color-primary);
+}
+
+.sensor-group-title {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.sensor-subtitle {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.sensor-avg-value {
+  font-family: var(--font-title);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.sensor-nodes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.sensor-node-item {
+  background-color: var(--color-bg-subcard);
+  border: 1px solid #EAEFEA;
+  border-radius: var(--radius-inner);
+  padding: 10px 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sensor-node-item.inactive {
+  opacity: 0.6;
+  background-color: #F0F2F0;
+}
+
+.node-location {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.node-value {
+  font-family: var(--font-title);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.node-status {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--color-inactive);
+  margin-top: 2px;
+}
+
+.node-status.active {
+  color: #27AE60;
+}
+
+/* ==========================================================================
+ *  FOOTER GLOBAL
+ *  ========================================================================== */
+.app-footer {
+  background-color: var(--color-primary);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+  padding: 12px 20px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: auto;
+  /* Empuja el footer al final de la pantalla si hay espacio sobrante */
+}
+
+.app-footer svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+ *  BREAKPOINTS RESPONSIVE (PANTALLAS GRANDES / PC)
+ *  ========================================================================== */
+/* ==========================================================================
+ *  BREAKPOINTS RESPONSIVE (PANTALLAS GRANDES / PC)
+ *  ========================================================================== */
+@media (min-width: 900px) {
+  .app-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* Bloque 1: Arriba a la Izquierda */
+  .block-1-grid {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Bloque 3: Arriba a la Derecha */
+  .block-3-container {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Bloque 2 (Gráfica): Abajo ocupando todo el ancho */
+  .block-2-container {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  /* Grilla de sensores internos: Se distribuyen los 6 nodos en 1 sola fila continua */
+  .sensor-nodes-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+}
+/* ==========================================================================
+ *  NUEVOS ESTILOS PARA LA LÓGICA DINÁMICA
+ *  Anexar al final del styles.css original
+ *  ========================================================================== */
+
+/* Ajustes para Chart.js */
+.chart-wrapper {
+  width: 100%;
+  height: 250px; /* Aumentado un poco para mejor visualización del Chart.js */
+  position: relative;
+  margin-top: 10px;
+}
+
+/* Controles de Toggle (Histórico / Predicción) */
+.toggle-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  background-color: var(--color-bg-subcard);
+  padding: 6px;
+  border-radius: var(--radius-inner);
+  width: fit-content;
+}
+
+.toggle-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-inactive);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+  color: var(--color-primary);
+}
+
+.toggle-btn.active {
+  background-color: var(--color-white);
+  color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Adaptación responsiva para los toggle en pantallas pequeñas */
+@media (max-width: 480px) {
+  .toggle-container {
+    width: 100%;
+  }
+  .toggle-btn {
+    flex: 1;
+    text-align: center;
+  }
+}

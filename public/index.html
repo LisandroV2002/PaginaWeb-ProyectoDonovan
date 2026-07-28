@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>SIVAI - Sistema Inteligente de Vigilancia Agrometeorológica</title>
+
+  <!-- Tipografías Oficiales de Marca via Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anek+Latin:wght@600;700&family=Reddit+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="icon" type="image/svg+xml" href="./icons/SIVAI_favicon.svg">
+  
+    <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <meta name="theme-color" content="#0A3632">
+
+  <!-- Hoja de Estilos Externa -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <div class="app-container">
+
+    <!-- 1. HEADER INSTITUCIONAL -->
+    <header class="app-header">
+      <div class="brand-group">
+        <div class="brand-logo-wrapper">
+          <img class="brand-logo-img" src="./icons/SIVAI_marca_Color_SF.svg" alt="Logo SIVAI"
+            title="Sistema Inteligente de Vigilancia Agrometeorológica para Invernaderos">
+        </div>
+
+        <div class="brand-titles">
+          <h1 class="brand-desc">Sistema Inteligente de Vigilancia Agrometeorológica para Invernaderos</h1>
+        </div>
+      </div>
+
+      <div class="institution-logo" title="INSTITUCIONAL">
+        <img class="inst-img" src="./icons/logo-unsl-negativo2.png" alt="logo-unsl"
+          title="Universidad Nacional de San Luis (UNSL)">
+        <img class="inst-img" src="./icons/inta_logo.png" alt="logo-inta"
+          title="Instituto Nacional de Tecnología Agropecuaria (INTA)">
+      </div>
+    </header>
+
+
+    <!-- DASHBOARD RESPONSIVE -->
+    <main class="app-content">
+
+      <!-- BLOQUE 1: ESTADO GENERAL Y CLIMA EXTENSIVO -->
+      <section class="block-1-grid">
+
+        <div class="station-card">
+          <div class="station-main">
+            <div class="station-badge-wrapper">
+              <svg class="station-signal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                <circle cx="12" cy="20" r="1" fill="currentColor"></circle>
+              </svg>
+              <span class="badge-active">ACTIVA</span>
+            </div>
+            <div>
+              <span class="station-label">ESTACIÓN</span>
+              <h2 class="station-name">Donovan</h2>
+            </div>
+          </div>
+          <div class="station-time">
+            <span class="update-label">Última actualización</span>
+            <strong id="last-update">--:--</strong>
+          </div>
+        </div>
+
+        <div class="status-banner">
+          <svg class="status-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <path d="m9 12 2 2 4-4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <div>
+            <span class="status-badge-title">ESTADO SEGURO</span>
+            <h2 id="status-main-title" class="status-main-title">Cargando...</h2>
+            <p class="status-description">Invernadero monitoreado. Todo bajo control.</p>
+          </div>
+        </div>
+
+        <div class="metric-hero-card">
+          <div>
+            <div class="metric-title-group">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
+              </svg>
+              <h3 class="metric-heading">Temperatura</h3>
+            </div>
+            <div id="temp-display" class="temp-display">--<span class="temp-unit">°C</span></div>
+          </div>
+          <div class="prediction-box">
+            <span class="prediction-label">Predicción 24 horas</span>
+            <span id="prediction-range" class="prediction-value">--°C - --°C</span>
+          </div>
+        </div>
+
+        <div class="metrics-secondary-grid">
+          <div class="secondary-card">
+            <div class="metric-title-group">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+              </svg>
+              <h4 class="metric-subheading">Humedad</h4>
+            </div>
+            <div id="humidity-display" class="secondary-value-display">--<span class="secondary-unit">%</span></div>
+          </div>
+
+          <!-- TARJETA DE VIENTO CON DIRECCIÓN -->
+          <div class="secondary-card">
+            <div class="metric-title-group">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path>
+              </svg>
+              <h4 class="metric-subheading">Viento</h4>
+            </div>
+            <div class="secondary-value-display">
+              <span id="wind-speed">--<span class="secondary-unit-sm">km/h</span></span>
+              <span id="wind-direction" class="wind-direction">-</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- BLOQUE 2: EVOLUCIÓN Y PROYECCIÓN DE TEMPERATURA -->
+      <section class="block-2-container">
+        
+        <div class="section-header-flex">
+          <h2 class="section-header-title">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+              <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+            Gráfica de Temperatura
+          </h2>
+          <!-- Explicación en lenguaje directo para el agricultor -->
+        <div class="farmer-explanation-box">
+
+        </div>
+          
+
+        <div class="chart-wrapper">
+           <!-- Canvas para Chart.js -->
+           <canvas id="tempChart"></canvas>
+        </div>
+
+        <!-- Proyección Horaria (Próximas 6 horas) renderizada dinámicamente -->
+        <div id="hourly-forecast-grid" class="hourly-forecast-grid">
+           <!-- Generado por JS -->
+        </div>
+      </section>
+
+      <!-- BLOQUE 3: RED DE SENSORES INTERNOS DEL INVERNADERO -->
+      <section class="block-3-container">
+        <h2 class="section-header-title block-full-width">
+          <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"></path>
+          </svg>
+          Datos Internos del Invernadero
+        </h2>
+
+        <!-- Humedad Promedio e Individuales -->
+        <article class="sensor-group-card">
+          <div class="sensor-group-header">
+            <div class="sensor-header-left">
+              <svg class="sensor-main-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+              </svg>
+              <div>
+                <h3 class="sensor-group-title">Humedad Promedio</h3>
+                <span class="sensor-subtitle">General del invernadero</span>
+              </div>
+            </div>
+            <div id="sensor-avg-humidity" class="sensor-avg-value">--%</div>
+          </div>
+
+          <div id="humidity-nodes-grid" class="sensor-nodes-grid">
+             <!-- Generado por JS -->
+          </div>
+        </article>
+
+        <!-- Temperatura Promedio e Individuales -->
+        <article class="sensor-group-card">
+          <div class="sensor-group-header">
+            <div class="sensor-header-left">
+              <svg class="sensor-main-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
+              </svg>
+              <div>
+                <h3 class="sensor-group-title">Temperatura Promedio</h3>
+                <span class="sensor-subtitle">General del invernadero</span>
+              </div>
+            </div>
+            <div id="sensor-avg-temp" class="sensor-avg-value">--°C</div>
+          </div>
+
+          <div id="temp-nodes-grid" class="sensor-nodes-grid">
+             <!-- Generado por JS -->
+          </div>
+        </article>
+
+      </section>
+
+    </main>
+    
+    <!-- FOOTER GLOBAL -->
+    <footer class="app-footer">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <span>Sistema de monitoreo en tiempo real para la toma de decisiones.</span>
+    </footer>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="mockData.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
