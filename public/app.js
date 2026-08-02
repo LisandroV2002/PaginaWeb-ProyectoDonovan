@@ -23,7 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
         forecastGrid: document.getElementById('hourly-forecast-grid'),
         stationBadge: document.querySelector('.station-badge-wrapper'),
         statusDescription: document.querySelector('.status-description'),
-        statusShield: document.querySelector('.status-shield-icon')
+        statusShield: document.querySelector('.status-shield-icon'),
+        statusBadgeTitle: document.querySelector('.status-badge-title')
     };
 
     // Función principal para cargar datos del backend
@@ -68,14 +69,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Alertas
         if(donovan.alertas && donovan.alertas.length > 0) {
-            domElements.estadoAlerta.textContent = "ATENCIÓN REQUERIDA";
+            // Diseño cuando HAY alertas (Naranja/Rojo + Escudo con Cruz)
+            if (domElements.statusBadgeTitle) domElements.statusBadgeTitle.textContent = "¡ALERTA ACTIVA!";
+            domElements.estadoAlerta.textContent = "Atención Requerida";
             domElements.estadoAlerta.style.color = "#E67E22";
             domElements.statusDescription.textContent = donovan.alertas.join(" | ");
+            
+            // Dibuja escudo con cruz (X)
+            domElements.statusShield.innerHTML = `
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <path d="M15 9l-6 6m0-6 6 6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            `;
             domElements.statusShield.style.color = "#E67E22";
+            
         } else {
-            domElements.estadoAlerta.textContent = "ESTADO SEGURO";
+            // Diseño cuando ESTÁ TODO BIEN (Verde + Escudo con Check)
+            if (domElements.statusBadgeTitle) domElements.statusBadgeTitle.textContent = "ESTADO SEGURO";
+            domElements.estadoAlerta.textContent = "Sin alertas activas";
             domElements.estadoAlerta.style.color = "#0A3632";
             domElements.statusDescription.textContent = "Invernadero monitoreado. Todo bajo control.";
+            
+            // Dibuja escudo con check
+            domElements.statusShield.innerHTML = `
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <path d="m9 12 2 2 4-4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            `;
             domElements.statusShield.style.color = "#72C02C";
         }
 

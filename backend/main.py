@@ -24,6 +24,7 @@ DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5433")
 DB_USER = os.getenv("DB_USER", "reader_user")
 DB_PASS = os.getenv("DB_PASS", "")
+
 ID_ESTACION = int(os.getenv("ID_ESTACION", 85))
 
 def get_db_connection(db_name: str):
