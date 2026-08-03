@@ -302,6 +302,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Iniciar y programar refresco
+    const REFRESH_INTERVAL_MS = 300000; // 5 minutos
+    let refreshIntervalId = null;
+
+    function iniciarPolling() {
+        if (refreshIntervalId) return; // ya está corriendo, evita duplicados
+        refreshIntervalId = setInterval(fetchDashboardData, REFRESH_INTERVAL_MS);
+    }
+
+    function detenerPolling() {
+        clearInterval(refreshIntervalId);
+        refreshIntervalId = null;
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            detenerPolling();
+        } else {
+            fetchDashboardData(); 
+            iniciarPolling();
+        }
+    });
+
     fetchDashboardData();
-    setInterval(fetchDashboardData, 300000); // 5 minutos
+    iniciarPolling();
 });
