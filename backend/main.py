@@ -128,7 +128,8 @@ def get_donovan_estado():
             "actual": {
                 "temperatura": float(actual["temperatura"]) if actual["temperatura"] is not None else None,
                 "humedad": float(actual["humedad"]) if actual["humedad"] is not None else None,
-                "viento_velocidad": float(actual["viento_velocidad"]) if actual["viento_velocidad"] is not None else None,
+                
+                "viento_velocidad": round(float(actual["viento_velocidad"]) * 3.6, 1) if actual["viento_velocidad"] is not None else None,
                 "viento_direccion": grados_a_cardinal(actual["viento_direccion"]),
                 "precipitacion": float(actual["precipitacion"]) if actual["precipitacion"] is not None else None
             },
