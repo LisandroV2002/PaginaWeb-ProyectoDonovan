@@ -14,3 +14,8 @@ __pycache__/
 
 # Archivos del sistema
 .DS_Store
+
+# Informes de la auditoría: se entregan aparte, no se versionan en master
+auditoria_pwa_sivai.md
+features_pwa_sivai.md
+resultados_testing_pwa_sivai.md
