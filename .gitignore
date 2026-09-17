@@ -1,6 +1,8 @@
 # Variables de entorno
 .env
 .env*
+# ...salvo la plantilla, que sí debe versionarse (no contiene secretos)
+!.env.example
 
 # Entorno virtual
 .venv/

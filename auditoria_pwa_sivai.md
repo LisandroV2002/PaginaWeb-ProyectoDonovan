@@ -22,15 +22,17 @@
 
 ## 1. Resumen de hallazgos
 
-| Severidad | Cantidad | Corregidos en este ticket | Pendientes |
+| Severidad | Cantidad | Corregidos | Pendientes |
 |---|---|---|---|
-| Crítico | 2 | 1 | 1 |
+| Crítico | 3 | 2 | 1 |
 | Alto | 6 | 5 | 1 |
 | Medio | 8 | 3 | 5 |
 | Bajo | 5 | 0 | 5 |
-| **Total** | **21** | **9** | **12** |
+| **Total** | **22** | **10** | **12** |
 
-Los hallazgos corregidos son exclusivamente los que caían dentro del alcance explícito de los puntos C1–C5 del pedido, más dos fallas de robustez que el propio cambio de contrato dejaba al descubierto (H-09 y H-10). Todo lo demás queda documentado y priorizado, sin tocar, según la restricción de alcance (punto F).
+Los hallazgos corregidos son los que caían dentro del alcance explícito de los puntos C1–C5, más dos fallas de robustez que el propio cambio de contrato dejaba al descubierto (H-09 y H-10). El resto quedó documentado y priorizado sin tocar, según la restricción de alcance (punto F).
+
+**Actualización del 2026-09-17:** los dos hallazgos críticos de seguridad que habían quedado a la espera de confirmación —**H-01** (credenciales con defaults permisivos) y **H-02** (ausencia de CSP y cabeceras de seguridad)— fueron **aprobados y aplicados**. El crítico pendiente es ahora H-17, la ausencia total de cobertura de tests, que es un proyecto en sí mismo.
 
 ---
 
@@ -48,15 +50,21 @@ DB_PASS = os.getenv("DB_PASS", "")
 
 **Riesgo:** en un servidor PostgreSQL con `trust` o `md5` mal configurado, un default vacío puede conectar. Peor aún, el fallo se manifiesta como error 500 genérico en runtime en lugar de un fallo de arranque explícito, lo que retrasa la detección.
 
-**Fix propuesto:** validar en el import y abortar el arranque si falta configuración obligatoria.
+**Fix aplicado:** ✅ Las cinco variables (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `ID_ESTACION`) pasaron a ser **obligatorias**: ya no tienen valores por defecto. Si falta alguna, o está vacía, o `DB_PORT`/`ID_ESTACION` no son enteros, la aplicación **no arranca**.
 
-```python
-DB_PASS = os.getenv("DB_PASS")
-if not DB_PASS:
-    raise RuntimeError("DB_PASS no configurada: revisar .env")
+La validación acumula todos los problemas y falla una sola vez con la lista completa, en lugar de ir fallando de a una:
+
+```
+RuntimeError: Configuración incompleta en backend/.env ->
+  faltan o están vacías: DB_PASS.
+  Copiar backend/.env.example a backend/.env y completar los valores.
 ```
 
-**Estado:** ❌ NO aplicado — requiere confirmación, cambia el comportamiento de arranque en los entornos existentes.
+El mensaje nombra **la variable, nunca su valor**, para no filtrar credenciales a los logs. La única excepción son `DB_PORT` e `ID_ESTACION`, que no son secretos y cuyo valor recibido sí se muestra porque ayuda a diagnosticar.
+
+Se agregó `backend/.env.example` con las variables documentadas, y se corrigió `.gitignore`: el patrón `.env*` estaba excluyendo también la plantilla, así que se añadió la excepción `!.env.example`. Verificado que el `.env` real sigue ignorado.
+
+**Verificado** en tres escenarios (ver casos T-34 a T-36 del informe de testing): sin `.env`, con `DB_PASS` vacía —el caso exacto del hallazgo— y con `DB_PORT` no numérico.
 
 ---
 
@@ -95,9 +103,38 @@ async def security_headers(request, call_next):
     return response
 ```
 
-⚠️ Nota: la CSP de arriba rompería los `style="..."` inline que `app.js` aplica sobre `statusShield`, `estadoAlerta` y `stationBadge`. Antes de activarla hay que migrar esos estilos inline a clases CSS (la infraestructura ya existe: las clases `status-alert` / `status-safe` / `status-nodata` que se agregaron en C3 son exactamente ese camino).
+**Fix aplicado:** ✅ Middleware de cabeceras en FastAPI, que cubre **todas** las respuestas — el API, los estáticos y el propio `sw.js`.
 
-**Estado:** ❌ NO aplicado — es un cambio de infraestructura con riesgo de romper el render; requiere confirmación y una tarea de migración de estilos inline.
+La política quedó **estricta, sin `'unsafe-inline'` en ninguna directiva**. Eso fue posible porque se auditó primero qué la rompería, y el resultado fue: nada.
+
+- Cero atributos `style="..."` en el markup.
+- Cero bloques `<style>` o `<script>` inline.
+- Cero llamadas a `setAttribute('style', ...)`.
+- Las seis asignaciones `element.style.x = ...` que quedan en `app.js` son **CSSOM**, y la CSP no gobierna el CSSOM — sólo los estilos que llegan por markup. Chart.js dimensiona su canvas por la misma vía, así que tampoco necesita excepción.
+
+La migración de estilos inline que este hallazgo anticipaba como prerequisito ya se había hecho al corregir C3, lo que dejó el camino libre.
+
+Política resultante:
+
+```
+default-src 'self'; script-src 'self';
+style-src 'self' https://fonts.googleapis.com;
+font-src 'self' https://fonts.gstatic.com;
+img-src 'self' data:; connect-src 'self';
+worker-src 'self'; manifest-src 'self';
+object-src 'none'; frame-ancestors 'none';
+base-uri 'self'; form-action 'self'
+```
+
+`worker-src 'self'` es la directiva que cierra el vector específico de PWA que motivaba este hallazgo: restringe el origen desde el que se puede registrar un Service Worker.
+
+Cabeceras adicionales: `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy: same-origin` y `Permissions-Policy` denegando geolocalización, micrófono, cámara, pagos, USB y sensores de movimiento — coherente con que la aplicación no solicita ningún permiso (ver H-08).
+
+`Strict-Transport-Security` se emite **sólo sobre HTTPS** (detectando `X-Forwarded-Proto` para funcionar detrás de un reverse proxy). Los navegadores la ignoran sobre HTTP, y enviarla siempre confundiría a quien audite las cabeceras en desarrollo local.
+
+**Interruptor de despliegue seguro:** con `CSP_REPORT_ONLY=true` la política se emite como `Content-Security-Policy-Report-Only`, de modo que el navegador reporta las violaciones por consola sin bloquear nada. Recomendado para la primera vuelta en producción, por si algún recurso externo no detectado en el análisis estático aparece en runtime.
+
+**Verificado en el navegador** con la política aplicada (no en modo report-only): **cero violaciones**. Cargan correctamente Chart.js, ambas tipografías de Google Fonts (`Anek Latin` y `Reddit Sans` en estado `loaded`), los tres logos institucionales, los dos endpoints del API y el gráfico. Ver casos T-37 a T-39.
 
 ---
 
@@ -491,8 +528,8 @@ Limitar el zoom máximo es una barrera de accesibilidad para usuarios con baja v
 
 | ID | Sev. | Área | Archivo:línea | Título | Estado |
 |---|---|---|---|---|---|
-| H-01 | Crítico | Seguridad | `backend/main.py:25-30` | Credenciales con defaults permisivos | ❌ Requiere confirmación |
-| H-02 | Crítico | Seguridad | `backend/main.py:225` | Sin CSP ni cabeceras de seguridad | ❌ Requiere confirmación |
+| H-01 | Crítico | Seguridad | `backend/main.py:25-30` | Credenciales con defaults permisivos | ✅ Corregido |
+| H-02 | Crítico | Seguridad | `backend/main.py:225` | Sin CSP ni cabeceras de seguridad | ✅ Corregido |
 | H-03 | Alto | Seguridad | `backend/main.py` | HTTPS no forzado | ❌ Infraestructura |
 | H-04 | Alto | Seguridad | `sw.js:24-40` | Caché sin control de vigencia | ✅ Corregido |
 | H-05 | Medio | Seguridad | `app.js` (`renderNodes`) | `innerHTML` sin escapar | ❌ Sugerencia E-1 |
@@ -519,14 +556,29 @@ Limitar el zoom máximo es una barrera de accesibilidad para usuarios con baja v
 
 ---
 
-## 7. Hallazgos críticos de seguridad — solicitud de confirmación
+## 7. Hallazgos críticos de seguridad — ✅ aplicados
 
-Conforme al punto F del pedido, los dos hallazgos críticos de seguridad **no fueron aplicados** y se reportan por separado para confirmación:
+Conforme al punto F, estos dos hallazgos se reportaron aparte y se aplicaron **una vez confirmados** (2026-09-17).
 
-1. **H-01** — validar y abortar el arranque si faltan `DB_PASS`/`DB_HOST`. Impacto: en entornos donde hoy arranca por defecto, pasaría a fallar explícitamente. Es el comportamiento correcto, pero cambia el arranque en producción.
-2. **H-02** — middleware de Content-Security-Policy. Impacto: requiere migrar previamente los `style="..."` inline de `app.js` a clases CSS, o la CSP romperá el render de los estados de alerta.
+### Qué cambia en el despliegue — leer antes de subir a producción
 
-Ambos son cambios de bajo esfuerzo (menos de media jornada cada uno) y alto impacto. **¿Los aplico?**
+**H-01 · La aplicación ahora falla al arrancar si falta configuración.**
+Es el comportamiento correcto —mejor un fallo ruidoso al arrancar que un 500 silencioso en runtime con contraseña vacía— pero **es un cambio de comportamiento en el arranque**. Antes de desplegar, confirmar que el entorno de producción define las cinco variables: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `ID_ESTACION`. Si alguna se inyecta por otro mecanismo (variables del contenedor, secretos del orquestador) y no por `.env`, sigue funcionando: la validación lee `os.getenv`, no el archivo.
+
+**H-02 · La CSP es estricta y podría bloquear recursos externos no detectados.**
+El análisis estático del código no encontró nada que la política rompa, y la verificación en navegador dio cero violaciones. Aun así, si en producción se sirve algún recurso desde un origen que no esté en el repositorio (un script de analítica, un CDN, una fuente distinta), quedaría bloqueado.
+
+Mitigación recomendada para la primera vuelta:
+
+```bash
+CSP_REPORT_ONLY=true
+```
+
+Con eso el navegador reporta las violaciones por consola sin bloquear nada. Revisar la consola un par de días y luego quitar la variable para que la política pase a aplicarse.
+
+### Lo que sigue pendiente en seguridad
+
+**H-03 · HTTPS no está forzado.** Deliberadamente NO se agregó un `HTTPSRedirectMiddleware`: rompería el entorno de desarrollo local sobre HTTP y, sobre todo, la terminación TLS corresponde al reverse proxy, no a la aplicación. Lo que sí quedó listo es la cabecera `Strict-Transport-Security`, que se emite automáticamente en cuanto la aplicación detecte que la petición llegó por HTTPS (directamente o vía `X-Forwarded-Proto`). **Falta la configuración de TLS en el proxy**, que es trabajo de infraestructura.
 
 ---
 

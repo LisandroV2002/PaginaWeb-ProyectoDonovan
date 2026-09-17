@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import psycopg2
@@ -11,8 +11,70 @@ load_dotenv()
 
 app = FastAPI(title="API Agrometeorológica UNSL")
 
-# Configurar CORS para permitir que el frontend local consulte la API
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:7777,http://127.0.0.1:7777").split(",")
+# ===========================================================================
+#  CONFIGURACIÓN OBLIGATORIA (hallazgo H-01)
+#  ---------------------------------------------------------------------------
+#  Antes, DB_PASS tenía default "" y el resto tenía defaults de desarrollo: si
+#  el .env no se cargaba (contenedor sin variables, deploy mal configurado,
+#  load_dotenv que no encuentra el archivo), la aplicación arrancaba igual e
+#  intentaba conectarse con contraseña vacía. El fallo recién se manifestaba en
+#  runtime como un 500 genérico, lo que retrasaba la detección.
+#
+#  Ahora: falta de configuración = la aplicación no arranca, y el mensaje dice
+#  exactamente qué falta. Nunca se registra el VALOR de una credencial, sólo el
+#  nombre de la variable.
+# ===========================================================================
+
+_faltantes = []
+_invalidas = []
+
+
+def _config(nombre: str) -> str:
+    valor = os.getenv(nombre)
+    if valor is None or not valor.strip():
+        _faltantes.append(nombre)
+        return ""
+    return valor.strip()
+
+
+def _config_int(nombre: str) -> int:
+    # Sólo se usa para valores no sensibles (puerto, id de estación), por eso
+    # es seguro incluir el valor recibido en el mensaje de error.
+    crudo = _config(nombre)
+    if not crudo:
+        return 0
+    try:
+        return int(crudo)
+    except ValueError:
+        _invalidas.append("{}={!r} (se esperaba un número entero)".format(nombre, crudo))
+        return 0
+
+
+DB_HOST = _config("DB_HOST")
+DB_PORT = _config_int("DB_PORT")
+DB_USER = _config("DB_USER")
+DB_PASS = _config("DB_PASS")
+ID_ESTACION = _config_int("ID_ESTACION")
+
+if _faltantes or _invalidas:
+    _detalle = []
+    if _faltantes:
+        _detalle.append("faltan o están vacías: " + ", ".join(_faltantes))
+    if _invalidas:
+        _detalle.append("valores inválidos: " + "; ".join(_invalidas))
+    raise RuntimeError(
+        "Configuración incompleta en backend/.env -> " + " | ".join(_detalle) +
+        ". Copiar backend/.env.example a backend/.env y completar los valores."
+    )
+
+# Configurar CORS para permitir que el frontend local consulte la API.
+# Nota: el frontend se sirve desde esta misma aplicación (StaticFiles al final
+# del archivo), así que en producción es same-origin y CORS no interviene.
+ALLOWED_ORIGINS = [
+    origen.strip()
+    for origen in os.getenv("ALLOWED_ORIGINS", "http://localhost:7777,http://127.0.0.1:7777").split(",")
+    if origen.strip()
+]
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,13 +83,82 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Credenciales y configuración (Ahora seguras)
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "5433")
-DB_USER = os.getenv("DB_USER", "reader_user")
-DB_PASS = os.getenv("DB_PASS", "")
+# ===========================================================================
+#  CABECERAS DE SEGURIDAD (hallazgo H-02)
+#  ---------------------------------------------------------------------------
+#  StaticFiles de Starlette no emite ninguna cabecera de seguridad. Sin CSP,
+#  cualquier XSS puede cargar scripts de cualquier origen y —lo más grave en una
+#  PWA— nada restringe desde qué origen se puede registrar un Service Worker,
+#  que sobrevive a la navegación e intercepta todo el tráfico de su scope.
+#
+#  La política es estricta a propósito: la aplicación no tiene scripts ni
+#  estilos inline, ni atributos style= en el markup, así que NO hace falta
+#  'unsafe-inline' en ningún lado. Los estilos que app.js aplica por JS
+#  (element.style.color = ...) son CSSOM, que la CSP no gobierna.
+#
+#  Los únicos orígenes externos son las tipografías de marca de Google Fonts:
+#  la hoja viene de fonts.googleapis.com y los archivos de fuente de
+#  fonts.gstatic.com.
+# ===========================================================================
 
-ID_ESTACION = int(os.getenv("ID_ESTACION", 85))
+CSP = "; ".join([
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data:",
+    "connect-src 'self'",
+    "worker-src 'self'",
+    "manifest-src 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+])
+
+# Permite desplegar la CSP en modo observación antes de hacerla obligatoria:
+# con CSP_REPORT_ONLY=true el navegador reporta las violaciones por consola
+# pero no bloquea nada. Útil para una primera vuelta en producción.
+CSP_REPORT_ONLY = os.getenv("CSP_REPORT_ONLY", "false").strip().lower() in ("1", "true", "yes", "si", "sí")
+
+PERMISSIONS_POLICY = ", ".join([
+    "geolocation=()",
+    "microphone=()",
+    "camera=()",
+    "payment=()",
+    "usb=()",
+    "magnetometer=()",
+    "accelerometer=()",
+])
+
+
+def _es_https(request: Request) -> bool:
+    reenviado = request.headers.get("x-forwarded-proto", "")
+    if reenviado:
+        return reenviado.split(",")[0].strip().lower() == "https"
+    return request.url.scheme == "https"
+
+
+@app.middleware("http")
+async def cabeceras_seguridad(request: Request, call_next):
+    response = await call_next(request)
+
+    cabecera_csp = "Content-Security-Policy-Report-Only" if CSP_REPORT_ONLY else "Content-Security-Policy"
+    response.headers[cabecera_csp] = CSP
+
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "same-origin"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Permissions-Policy"] = PERMISSIONS_POLICY
+
+    # HSTS sólo tiene sentido sobre HTTPS; los navegadores la ignoran sobre
+    # HTTP, y enviarla siempre confundiría a quien audite las cabeceras en el
+    # entorno de desarrollo local.
+    if _es_https(request):
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+
+    return response
 
 def get_db_connection(db_name: str):
     return psycopg2.connect(

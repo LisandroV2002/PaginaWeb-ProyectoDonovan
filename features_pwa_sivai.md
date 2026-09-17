@@ -157,11 +157,17 @@
 |---|---|---|---|---|---|---|
 | 92 | **HTTPS/TLS** | Infraestructura | ❌ **No forzado** (sin redirect, sin HSTS) | ❌ **Sin cambios** | ❌ | H-03 |
 | 92b | Backend FastAPI operativo contra PostgreSQL | Infraestructura | ⚠️ No verificable (sin Python en la máquina) | ✅ Verificado con datos reales | ✅ | T-25 |
-| 93 | Content-Security-Policy | Infraestructura | ❌ Ausente | ❌ **Sin cambios** | ❌ | H-02 |
-| 94 | Cabeceras de seguridad (`nosniff`, `Referrer-Policy`, …) | Infraestructura | ❌ Ausentes | ❌ **Sin cambios** | ❌ | H-02 |
+| 93 | **Content-Security-Policy** | Infraestructura | ❌ Ausente | ✅ Estricta, sin `'unsafe-inline'` | ✅ | T-37, T-38 |
+| 93b | `worker-src` restringiendo el registro del SW | Infraestructura | ❌ Ausente | ✅ `worker-src 'self'` | ✅ | T-37 |
+| 93c | Modo report-only para despliegue gradual | Infraestructura | — | ✅ `CSP_REPORT_ONLY` | ✅ | T-37 |
+| 94 | **Cabeceras de seguridad** (`nosniff`, `Referrer-Policy`, `X-Frame-Options`, COOP) | Infraestructura | ❌ Ausentes | ✅ En todas las respuestas | ✅ | T-37 |
+| 94b | `Permissions-Policy` denegando permisos no usados | Infraestructura | ❌ Ausente | ✅ 7 permisos denegados | ✅ | T-37 |
+| 94c | `Strict-Transport-Security` condicional a HTTPS | Infraestructura | ❌ Ausente | ✅ Sólo sobre HTTPS / `X-Forwarded-Proto` | ✅ | T-39 |
 | 95 | CORS restringido por origen y a GET | Infraestructura | ✅ | ✅ | ✅ | — |
 | 96 | Credenciales fuera del repositorio (`.gitignore`) | Infraestructura | ✅ | ✅ | ✅ | — |
-| 97 | Validación de configuración obligatoria al arrancar | Infraestructura | ❌ Defaults permisivos | ❌ **Sin cambios** | ❌ | H-01 |
+| 97 | **Validación de configuración obligatoria al arrancar** | Infraestructura | ❌ Defaults permisivos (`DB_PASS=""`) | ✅ No arranca sin las 5 variables | ✅ | T-34, T-35, T-36 |
+| 97b | Plantilla `.env.example` versionada | Infraestructura | ❌ No existía | ✅ Con excepción en `.gitignore` | ✅ | T-36 |
+| 97c | Los errores de configuración no exponen credenciales | Infraestructura | — | ✅ Nombran la variable, no el valor | ✅ | T-35 |
 | 98 | Servido de estáticos desde FastAPI | Infraestructura | ✅ | ✅ | ✅ | — |
 | 99 | Tests automatizados | QA | ❌ Ninguno | ❌ **Ninguno** | ❌ | H-17 / E-0 |
 | 100 | Pipeline de CI | QA | ❌ | ❌ | ❌ | E-0 |
@@ -178,8 +184,8 @@
 | D. Alertas y estados | 14 | 0 | 0 | 0 | 14 |
 | E. Frescura y conectividad | 13 | 0 | 1 | 0 | 15 |
 | F. Presentación / a11y | 7 | 1 | 1 | 0 | 10 |
-| G. Infraestructura | 5 | 0 | 5 | 0 | 10 |
-| **Total** | **85** | **4** | **9** | **5** | **103** |
+| G. Infraestructura | 13 | 0 | 2 | 0 | 15 |
+| **Total** | **93** | **4** | **6** | **5** | **108** |
 
 **Los 5 cambios pedidos en el punto C: 5/5 ✅** (features 67-71, 12, 60-61c, 64-65, 28).
 

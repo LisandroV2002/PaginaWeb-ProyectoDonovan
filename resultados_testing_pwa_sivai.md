@@ -1,6 +1,6 @@
 # Resultados de testing — PWA SIVAI
 
-**Fechas:** 2026-09-15 (primera ronda, mock server) · 2026-09-17 (segunda ronda, backend real)
+**Fechas:** 2026-09-15 (primera ronda, mock server) · 2026-09-17 (segunda ronda, backend real; tercera ronda, correcciones de seguridad)
 **Responsable:** auditoría técnica del ticket "Auditoría y corrección de la PWA SIVAI"
 
 ---
@@ -552,6 +552,125 @@ Desktop 1280×900 y mobile 375×812, con datos reales de PostgreSQL:
 
 ---
 
+## 2 ter. Tercera ronda — correcciones de seguridad H-01 y H-02 (2026-09-17)
+
+Tras la aprobación del equipo se aplicaron los dos hallazgos críticos de seguridad que habían quedado reportados aparte. Todo se verificó contra el backend real.
+
+### H-01 · La aplicación no arranca sin configuración
+
+#### T-34 · Sin `.env` — **PASS** ✅
+
+Se simuló un `.env` ausente (`load_dotenv` neutralizado) y se limpiaron las cinco variables del entorno.
+
+| Verificación | Esperado | Obtenido |
+|---|---|---|
+| Arranque | Debe fallar | ✅ `RuntimeError` en el import |
+| Mensaje | Nombra todas las faltantes de una vez | ✅ "faltan o están vacías: DB_HOST, DB_PORT, DB_USER, DB_PASS, ID_ESTACION" |
+| Guía de resolución | Apunta a la plantilla | ✅ "Copiar backend/.env.example a backend/.env y completar los valores." |
+
+**Antes del cambio:** arrancaba normalmente e intentaba conectarse a `localhost:5433` como `reader_user` con contraseña vacía. El fallo aparecía recién al primer request, como un 500 genérico.
+
+---
+
+#### T-35 · `DB_PASS` vacía — **PASS** ✅
+
+El caso exacto que motivaba el hallazgo: el resto de la configuración presente y sólo la contraseña vacía.
+
+| Verificación | Esperado | Obtenido |
+|---|---|---|
+| Arranque | Debe fallar | ✅ `RuntimeError` |
+| Mensaje | Señala sólo `DB_PASS` | ✅ "faltan o están vacías: DB_PASS" |
+| **No filtra credenciales** | Nombra la variable, nunca el valor | ✅ Verificado |
+
+---
+
+#### T-36 · `DB_PORT` no numérico — **PASS** ✅
+
+| Verificación | Esperado | Obtenido |
+|---|---|---|
+| Arranque | Debe fallar | ✅ `RuntimeError` |
+| Mensaje | Distingue "inválida" de "faltante" | ✅ "valores inválidos: DB_PORT='cinco-mil' (se esperaba un número entero)" |
+
+Se muestra el valor recibido porque el puerto no es un secreto y ayuda a diagnosticar. `DB_PASS` nunca pasa por esta ruta.
+
+**Plantilla `.env.example`:** se verificó que quede versionable. El patrón `.env*` del `.gitignore` la estaba excluyendo junto con el `.env` real; se añadió la excepción `!.env.example`.
+
+```
+$ git add --dry-run backend/.env.example
+add 'backend/.env.example'          ← la plantilla entra
+
+$ git check-ignore -v backend/.env
+.gitignore:3:.env*  backend/.env    ← el .env real sigue ignorado
+```
+
+---
+
+### H-02 · Cabeceras de seguridad y CSP
+
+#### T-37 · Cabeceras emitidas en todas las respuestas — **PASS** ✅
+
+| Cabecera | Valor |
+|---|---|
+| `Content-Security-Policy` | `default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` |
+| `X-Content-Type-Options` | `nosniff` |
+| `Referrer-Policy` | `same-origin` |
+| `X-Frame-Options` | `DENY` |
+| `Cross-Origin-Opener-Policy` | `same-origin` |
+| `Permissions-Policy` | `geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), accelerometer=()` |
+
+Cobertura verificada en tres tipos de respuesta distintos, porque `StaticFiles` y los endpoints pasan por caminos diferentes:
+
+| Ruta | Status | CSP | nosniff |
+|---|---|---|---|
+| `/` (HTML por StaticFiles) | 200 | ✅ | ✅ |
+| `/api/donovan/estado` (endpoint) | 200 | ✅ | ✅ |
+| `/sw.js` (script del SW) | 200 | ✅ | ✅ |
+| `/styles.css` | 200 | ✅ | ✅ |
+
+**Sin `'unsafe-inline'` en ninguna directiva.** Fue posible porque se auditó primero qué la rompería: cero atributos `style=` en el markup, cero bloques `<style>`/`<script>` inline, cero `setAttribute('style')`. Las seis asignaciones `element.style.x = ...` que quedan en `app.js` son CSSOM, que la CSP no gobierna.
+
+---
+
+#### T-38 · La CSP no rompe nada en el navegador — **PASS** ✅
+
+Página cargada con la política **aplicada**, no en modo report-only. Se instaló un listener de `securitypolicyviolation` para capturar cualquier bloqueo.
+
+| Verificación | Obtenido |
+|---|---|
+| **Violaciones de CSP** | ✅ **0** (array vacío) |
+| Chart.js cargado | ✅ `typeof Chart !== 'undefined'` |
+| Gráfico renderizado | ✅ canvas con ancho > 0 |
+| Tipografías de Google Fonts | ✅ `Anek Latin` 600/700 y `Reddit Sans` 400 en estado `loaded` |
+| Fuente aplicada al DOM | ✅ `"Anek Latin", -apple-system, sans-serif` |
+| Logos institucionales | ✅ los 3 con `naturalWidth > 0` |
+| Endpoints del API | ✅ 200, datos en pantalla (11.5 °C) |
+| Nodos de sensores | ✅ 12 |
+
+**Regresión de los tres estados del banner con la CSP activa:**
+
+| Estado | Fondo | Borde | Escudo | Violaciones |
+|---|---|---|---|---|
+| Seguro | `rgb(232,248,206)` | `rgb(197,238,144)` | `rgb(114,192,44)` | 0 |
+| Alerta | `rgb(248,226,206)` | `rgb(230,126,34)` | `rgb(179,88,12)` | 0 |
+| Vuelta a seguro | `rgb(232,248,206)` | `rgb(197,238,144)` | `rgb(114,192,44)` | 0 |
+
+Badge INACTIVA `rgb(217,56,56)`, sin scroll horizontal. Todo el comportamiento de C1–C5 se conserva bajo la política.
+
+**Sobre el Service Worker:** sigue fallando al registrarse con el mismo error de siempre. **No es la CSP**: `worker-src 'self'` permite el registro, un bloqueo por política habría disparado un evento `securitypolicyviolation` con esa directiva, y el array de violaciones está vacío. El error es idéntico al que se observaba en las dos rondas anteriores, antes de que existiera ninguna CSP.
+
+---
+
+#### T-39 · HSTS condicional a HTTPS — **PASS** ✅
+
+| Escenario | Esperado | Obtenido |
+|---|---|---|
+| Petición HTTP directa | Sin HSTS | ✅ Ausente |
+| `X-Forwarded-Proto: https` (reverse proxy TLS) | Con HSTS | ✅ `max-age=31536000; includeSubDomains` |
+| `X-Forwarded-Proto: http` | Sin HSTS | ✅ Ausente |
+
+Los navegadores ignoran HSTS sobre HTTP, así que emitirla siempre sería ruido; peor, confundiría a quien audite las cabeceras en desarrollo local. Con esta lógica, la cabecera empieza a funcionar sola en cuanto se configure TLS en el proxy, sin tocar código.
+
+---
 ## 3. Resumen
 
 | Bloque | PASS | PASS (arnés) | Parcial | Pendiente | Total |
@@ -562,7 +681,8 @@ Desktop 1280×900 y mobile 375×812, con datos reales de PostgreSQL:
 | 4 · Conectividad (mock) | 3 | — | — | — | 3 |
 | 5 · Responsive / a11y | 2 | — | 1 | — | 3 |
 | **2 bis · Backend real** | **8** | — | **1** | — | **9** |
-| **Total** | **19** | **6** | **3** | **1** | **29** |
+| **2 ter · Seguridad H-01/H-02** | **6** | — | — | — | **6** |
+| **Total** | **25** | **6** | **3** | **1** | **35** |
 
 **Fallos: 0.**
 
