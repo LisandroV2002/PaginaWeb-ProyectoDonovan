@@ -49,6 +49,7 @@ def get_donovan_estado():
         # 1. Obtener datos actuales y calcular si está activa (umbral 30 min)
         cursor.execute("""
             SELECT temperatura, humedad, viento_velocidad, viento_direccion, precipitacion,
+                   fecha_hora,
                    EXTRACT(EPOCH FROM (NOW() - fecha_hora))/60 as minutos_pasados
             FROM datos_rem_temp 
             WHERE id_estacion = %s 
@@ -57,13 +58,35 @@ def get_donovan_estado():
         actual = cursor.fetchone()
 
         if not actual:
-            return {"error": "Sin datos"}
+            # Se devuelve la MISMA forma que en el caso normal (con nulos) para que el
+            # frontend distinga "sin datos" de "estacion inactiva" sin romperse.
+            return {
+                "estacion": {
+                    "estado": "sin_datos",
+                    "activa": False,
+                    "minutos_pasados": None,
+                    "last_reading_at": None
+                },
+                "actual": {
+                    "temperatura": None,
+                    "humedad": None,
+                    "viento_velocidad": None,
+                    "viento_direccion": None,
+                    "precipitacion": None
+                },
+                "predicciones": [],
+                "predicciones_generadas_at": None,
+                "historial": [],
+                "alertas": [],
+                "error": "Sin datos"
+            }
 
-        activa = actual["minutos_pasados"] <= 30
+        minutos_pasados = float(actual["minutos_pasados"])
+        activa = minutos_pasados <= 30
 
         # 2. Obtener predicciones (modelo 1) para las alertas y el panel
         cursor.execute("""
-            SELECT horizonte, temperatura_predicha 
+            SELECT horizonte, temperatura_predicha, fecha_generacion
             FROM predicciones_temperatura 
             WHERE id_estacion = %s AND modelo = 1 
               AND fecha_generacion = (
@@ -73,7 +96,18 @@ def get_donovan_estado():
               )
             ORDER BY horizonte ASC LIMIT 6
         """, (ID_ESTACION, ID_ESTACION))
-        predicciones = cursor.fetchall()
+        predicciones_raw = cursor.fetchall()
+
+        # La fecha de generación es común a todo el lote: se expone una sola vez y se
+        # quita de cada fila para no alterar la forma del array 'predicciones'.
+        predicciones_generadas_at = None
+        if predicciones_raw and predicciones_raw[0].get("fecha_generacion") is not None:
+            predicciones_generadas_at = predicciones_raw[0]["fecha_generacion"].isoformat()
+
+        predicciones = [
+            {"horizonte": p["horizonte"], "temperatura_predicha": p["temperatura_predicha"]}
+            for p in predicciones_raw
+        ]
 
         # Lógica de alertas (Temperaturas)
         alertas = []
@@ -122,8 +156,13 @@ def get_donovan_estado():
 
         return {
             "estacion": {
+                # Estado explicito de 3 valores: activa | inactiva | sin_datos
+                "estado": "activa" if activa else "inactiva",
                 "activa": activa,
-                "minutos_pasados": int(actual["minutos_pasados"])
+                "minutos_pasados": int(minutos_pasados),
+                # Timestamp REAL de la ultima lectura guardada en la base.
+                # La UI debe mostrar este valor, nunca la hora del dispositivo.
+                "last_reading_at": actual["fecha_hora"].isoformat() if actual["fecha_hora"] else None
             },
             "actual": {
                 "temperatura": float(actual["temperatura"]) if actual["temperatura"] is not None else None,
@@ -134,6 +173,7 @@ def get_donovan_estado():
                 "precipitacion": float(actual["precipitacion"]) if actual["precipitacion"] is not None else None
             },
             "predicciones": predicciones,
+            "predicciones_generadas_at": predicciones_generadas_at,
             "historial": historial,
             "alertas": alertas
         }

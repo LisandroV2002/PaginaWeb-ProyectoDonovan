@@ -31,6 +31,11 @@
 
   <div class="app-container">
 
+    <!-- 0. INDICADOR DE CONEXION / ESTADO DE DATOS -->
+    <div id="connection-banner" class="connection-banner" role="status" aria-live="polite" hidden>
+      <span id="connection-banner-text"></span>
+    </div>
+
     <!-- 1. HEADER INSTITUCIONAL -->
     <header class="app-header">
       <div class="brand-group">
@@ -77,11 +82,13 @@
           </div>
           <div class="station-time">
             <span class="update-label">Última actualización</span>
-            <strong id="last-update">--:--</strong>
+            <!-- Antigüedad de la ÚLTIMA LECTURA de la base (no la hora del dispositivo) -->
+            <strong id="last-update">--</strong>
+            <span id="last-update-abs" class="update-abs"></span>
           </div>
         </div>
 
-        <div class="status-banner">
+        <div class="status-banner status-safe">
           <svg class="status-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             <path d="m9 12 2 2 4-4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>

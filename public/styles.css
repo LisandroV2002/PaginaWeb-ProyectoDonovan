@@ -30,6 +30,20 @@
   --color-alert-yellow: #F1C40F;
   /* Prevención Baja */
 
+  /* Superficie de alerta: equivalente naranja de --color-surface-soft.
+     Mismo rol y misma luminosidad que el verde menta del estado seguro. */
+  --color-surface-alert: #F8E2CE;
+  --color-alert-text: #7A3E0A;
+  /* Texto sobre superficie de alerta (6.65:1) */
+  --color-alert-title: #9A4A0A;
+  /* Título sobre superficie de alerta (4.99:1) */
+  --color-alert-icon: #B3580C;
+  /* Escudo sobre superficie de alerta (3.88:1) */
+
+  /* Superficie neutra: estación sin lecturas */
+  --color-surface-nodata: #F0F2F0;
+  --color-nodata-text: #4A544A;
+
   /* Tipografías */
   --font-title: 'Anek Latin', -apple-system, sans-serif;
   --font-body: 'Reddit Sans', -apple-system, sans-serif;
@@ -738,5 +752,149 @@ body {
   .toggle-btn {
     flex: 1;
     text-align: center;
+  }
+}
+/* ==========================================================================
+ *  ESTADOS DINÁMICOS: BANNER DE ALERTA, BADGE DE ESTACIÓN Y CONEXIÓN
+ *  ========================================================================== */
+
+/* --- C3: fondo Y borde del banner según el nivel de alerta ----------------
+ * Ambos estaban hardcodeados en la regla base .status-banner, así que el
+ * banner quedaba verde (fondo menta + borde verde) incluso con una alerta
+ * activa. Ahora los define el estado, y el estado de alerta usa exactamente
+ * el mismo esquema que el estado seguro pero en la escala naranja:
+ *
+ *   rol              seguro              alerta
+ *   ---------------  ------------------  --------------------------
+ *   fondo            #E8F8CE (menta)     #F8E2CE (naranja claro)
+ *   borde            #C5EE90             #E67E22
+ *   título           #0A3632  (11.82:1)  #9A4A0A  (4.99:1)
+ *   texto            #0A3632  (11.82:1)  #7A3E0A  (6.65:1)
+ *   escudo           #72C02C             #B3580C  (3.88:1)
+ *
+ * Los colores se definen acá y no en línea desde JS, para que ningún estilo
+ * inline pueda volver a dejar un estado sin actualizar (que es la causa raíz
+ * del bug original).
+ */
+.status-banner.status-safe {
+  background-color: var(--color-surface-soft);
+  border-color: #C5EE90;
+}
+
+.status-banner.status-safe .status-main-title,
+.status-banner.status-safe .status-badge-title,
+.status-banner.status-safe .status-description {
+  color: var(--color-primary);
+}
+
+.status-banner.status-safe .status-shield-icon {
+  color: #72C02C;
+}
+
+.status-banner.status-alert {
+  background-color: var(--color-surface-alert);
+  border-color: var(--color-alert-orange);
+}
+
+.status-banner.status-alert .status-main-title {
+  color: var(--color-alert-title);
+}
+
+.status-banner.status-alert .status-badge-title,
+.status-banner.status-alert .status-description {
+  color: var(--color-alert-text);
+  opacity: 1;
+}
+
+.status-banner.status-alert .status-shield-icon {
+  color: var(--color-alert-icon);
+}
+
+/* Sin datos de la estación: estado neutro, ni seguro ni alerta */
+.status-banner.status-nodata {
+  background-color: var(--color-surface-nodata);
+  border-color: #B9C2B9;
+}
+
+.status-banner.status-nodata .status-main-title,
+.status-banner.status-nodata .status-badge-title,
+.status-banner.status-nodata .status-description {
+  color: var(--color-nodata-text);
+  opacity: 1;
+}
+
+.status-banner.status-nodata .status-shield-icon {
+  color: var(--color-nodata-text);
+}
+
+/* --- C4: badge de estado de la estación ----------------------------------
+ * .badge-active es la píldora base (nombre heredado); el modificador define
+ * el color de fondo y de texto de cada estado. */
+.badge-active.badge-inactive {
+  background-color: var(--color-alert-red);
+  color: var(--color-white);
+}
+
+.badge-active.badge-nodata {
+  background-color: #5A6B5A;
+  color: var(--color-white);
+}
+
+/* --- C1: antigüedad de la última lectura --------------------------------- */
+.update-abs {
+  display: block;
+  font-size: 0.68rem;
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Lectura vieja (la estación no reporta): se resalta el dato, no se oculta */
+#last-update.reading-stale {
+  color: #FFD08A;
+}
+
+#last-update.reading-none {
+  color: #FFB3B3;
+}
+
+/* --- Indicador de conexión / error de API -------------------------------- */
+.connection-banner {
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  color: #4A3000;
+  background-color: var(--color-alert-yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.connection-banner[hidden] {
+  display: none;
+}
+
+.connection-banner.is-offline {
+  background-color: #5A6B5A;
+  color: var(--color-white);
+}
+
+.connection-banner.is-error {
+  background-color: var(--color-alert-red);
+  color: var(--color-white);
+}
+
+.connection-banner.is-loading {
+  background-color: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+
+/* Reduce el parpadeo del indicador en usuarios sensibles al movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .connection-banner {
+    transition: none;
   }
 }
