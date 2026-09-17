@@ -840,12 +840,11 @@ body {
   color: var(--color-white);
 }
 
-/* --- C1: antigüedad de la última lectura --------------------------------- */
-.update-abs {
-  display: block;
-  font-size: 0.68rem;
-  opacity: 0.75;
-  font-variant-numeric: tabular-nums;
+/* --- C1: antigüedad de la última lectura ---------------------------------
+ * Se mantiene en una sola línea para conservar el alto original de la
+ * tarjeta de estación; la fecha exacta se consulta en el tooltip. */
+#last-update {
+  white-space: nowrap;
 }
 
 /* Lectura vieja (la estación no reporta): se resalta el dato, no se oculta */

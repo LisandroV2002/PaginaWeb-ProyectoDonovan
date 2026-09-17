@@ -129,7 +129,7 @@ Escenario `inactiva`. Lectura de la base: `10:21`. Hora del dispositivo al rende
 | Verificación | Esperado | Obtenido |
 |---|---|---|
 | **Antigüedad (criterio de aceptación C1)** | **"hace 2 horas"** | ✅ **`hace 2 horas`** |
-| Fecha/hora exacta de la lectura | 15/09 10:21 | ✅ `Lectura: 15/09 10:21` |
+| Fecha/hora exacta de la lectura | 15/09 10:21 | ✅ En el tooltip (ver T-40) |
 | Tooltip | Lectura registrada | ✅ "Última lectura registrada: 15/09 10:21" |
 | Clase de lectura vieja | `reading-stale` | ✅ |
 | **Badge: texto** | **INACTIVA** | ✅ |
@@ -440,7 +440,7 @@ Estáticos servidos por `StaticFiles`: `/`, `/app.js`, `/sw.js`, `/styles.css`, 
 | Verificación | Esperado | Obtenido |
 |---|---|---|
 | **Antigüedad** | Derivada de la base | ✅ `hace 48 minutos`, luego `hace 53 minutos` |
-| **Fecha de lectura** | La de la base, sin convertir zona | ✅ `Lectura: 17/09 08:07` |
+| **Fecha de lectura** | La de la base, sin convertir zona | ✅ `17/09 08:07` en el tooltip |
 | Clase de lectura vieja | `reading-stale` | ✅ |
 | **Badge** | INACTIVA rojo/blanco | ✅ `rgb(217,56,56)` / `rgb(255,255,255)` |
 | Temperatura | La de la base (11.5 °C) | ✅ `11.5°C` |
@@ -671,6 +671,25 @@ Badge INACTIVA `rgb(217,56,56)`, sin scroll horizontal. Todo el comportamiento d
 Los navegadores ignoran HSTS sobre HTTP, así que emitirla siempre sería ruido; peor, confundiría a quien audite las cabeceras en desarrollo local. Con esta lógica, la cabecera empieza a funcionar sola en cuanto se configure TLS en el proxy, sin tocar código.
 
 ---
+#### T-40 · La tarjeta de estación conserva su alto original — **PASS** ✅
+
+La primera versión de C1 agregaba la fecha exacta de la lectura como una segunda línea bajo la antigüedad, lo que hacía crecer el bloque "Última actualización" dentro de la tarjeta verde de estación. Se revirtió a una sola línea; la fecha exacta pasó al tooltip.
+
+Medición comparativa contra el commit original (`678a6d0`) servido en paralelo, a 1280 px:
+
+| Elemento | Original | Con 2 líneas | Corregido |
+|---|---|---|---|
+| `.app-header` | 1265 × 82 | 1265 × 82 | **1265 × 82** ✅ |
+| `.app-header` columnas | 124.9 / 927.7 / 132.4 | idénticas | **idénticas** ✅ |
+| `.station-card` | 601 × 78 | 601 × 78 | **601 × 78** ✅ |
+| `.station-time` alto | **32** | 46 ❌ | **32** ✅ |
+| `.station-time` ancho | 100 | 116 | 116 ⚠️ |
+
+**El header superior nunca cambió** — es idéntico píxel a píxel en las tres versiones, incluidas las columnas del grid. El banner de conexión que se insertó antes del header no lo afecta: está `display: none` mientras no haya nada que informar.
+
+El alto del bloque quedó restaurado exactamente. Quedan 16 px de ancho de diferencia, que no vienen de ninguna regla CSS sino del texto en sí: `.station-time` se dimensiona por su hijo más ancho, y "hace 2 horas 7 min" mide más que "--:--". Es consecuencia directa del criterio de aceptación de C1, que exige mostrar la antigüedad en lugar de la hora del reloj.
+
+Verificado también a 375 px: una sola línea, alto 32, sin scroll horizontal.
 ## 3. Resumen
 
 | Bloque | PASS | PASS (arnés) | Parcial | Pendiente | Total |
@@ -682,7 +701,8 @@ Los navegadores ignoran HSTS sobre HTTP, así que emitirla siempre sería ruido;
 | 5 · Responsive / a11y | 2 | — | 1 | — | 3 |
 | **2 bis · Backend real** | **8** | — | **1** | — | **9** |
 | **2 ter · Seguridad H-01/H-02** | **6** | — | — | — | **6** |
-| **Total** | **25** | **6** | **3** | **1** | **35** |
+| **2 quater · Ajuste de layout** | **1** | — | — | — | **1** |
+| **Total** | **26** | **6** | **3** | **1** | **36** |
 
 **Fallos: 0.**
 

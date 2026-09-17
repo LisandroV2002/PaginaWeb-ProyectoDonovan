@@ -118,7 +118,7 @@
 |---|---|---|---|---|---|---|
 | 67 | **Timestamp de la última lectura efectiva de la base** | API REST | ❌ No se exponía | ✅ Campo `last_reading_at` | ✅ | T-03 |
 | 68 | **Antigüedad relativa ("hace 2 horas")** | Frontend | ❌ Mostraba la hora del dispositivo | ✅ Derivada de `minutos_pasados` (SQL) | ✅ | T-03 |
-| 69 | Fecha/hora exacta de la lectura visible | Frontend | ❌ | ✅ "Lectura: 15/09 10:21" | ✅ | T-03 |
+| 69 | Fecha/hora exacta de la lectura accesible | Frontend | ❌ | ✅ En el tooltip del dato | ✅ | T-03, T-40 |
 | 70 | Resalte visual de lectura vieja (> 30 min) | Frontend / CSS | ❌ | ✅ Clase `.reading-stale` | ✅ | T-03 |
 | 71 | Inmunidad a la zona horaria del cliente | API REST / Frontend | ❌ | ✅ `minutos_pasados` calculado en SQL | ✅ | T-03 |
 | 72 | **Modo offline + indicador de estado** | SW / Frontend | ❌ **Indicador inexistente** | ✅ Banner con 4 estados | ✅ | T-15 |

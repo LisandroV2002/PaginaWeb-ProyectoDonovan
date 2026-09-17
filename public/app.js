@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
         statusDescription: document.querySelector('.status-description'),
         statusShield: document.querySelector('.status-shield-icon'),
         statusBadgeTitle: document.querySelector('.status-badge-title'),
-        ultimaActualizacionAbs: document.getElementById('last-update-abs'),
         connectionBanner: document.getElementById('connection-banner'),
         connectionBannerText: document.getElementById('connection-banner-text')
     };
@@ -214,10 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
             domElements.ultimaActualizacion.classList.add('reading-stale');
         }
 
-        if (domElements.ultimaActualizacionAbs) {
-            const fechaLectura = formatearFechaLectura(estacion.last_reading_at);
-            domElements.ultimaActualizacionAbs.textContent = fechaLectura ? `Lectura: ${fechaLectura}` : '';
-        }
+        // La fecha y hora exactas de la lectura van en el tooltip, para que el
+        // bloque conserve una sola línea y el alto original de la tarjeta.
         domElements.ultimaActualizacion.title = estacion.last_reading_at
             ? `Última lectura registrada: ${formatearFechaLectura(estacion.last_reading_at)}`
             : 'La estación no registra lecturas';
