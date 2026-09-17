@@ -3,7 +3,7 @@
   "short_name": "SIVAI",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#0A3632",
   "theme_color": "#0A3632",
   "orientation": "portrait",
   "icons": [

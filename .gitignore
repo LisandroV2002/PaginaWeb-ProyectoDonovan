@@ -1,6 +1,8 @@
 # Variables de entorno
 .env
 .env*
+# ...salvo la plantilla, que sí debe versionarse (no contiene secretos)
+!.env.example
 
 # Entorno virtual
 .venv/
@@ -12,3 +14,8 @@ __pycache__/
 
 # Archivos del sistema
 .DS_Store
+
+# Informes de la auditoría: se entregan aparte, no se versionan en master
+auditoria_pwa_sivai.md
+features_pwa_sivai.md
+resultados_testing_pwa_sivai.md
